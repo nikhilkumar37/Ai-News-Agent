@@ -1,0 +1,43 @@
+name: Daily AI Tech Short
+
+on:
+  schedule:
+    # Runs at 08:00 UTC every day
+    - cron: '0 8 * * *'
+  workflow_dispatch: # Allows you to run it manually to test
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install System Dependencies (FFmpeg & ImageMagick)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg imagemagick
+          # Fix ImageMagick security policy to allow text
+          sudo sed -i 's/none/read,write/g' /etc/ImageMagick-6/policy.xml
+
+      - name: Install Python Libraries
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run AI Agent
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+        run: python main.py
+
+      - name: Upload Video Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-short
+          path: final_short.mp4
