@@ -1,0 +1,7 @@
+requests
+feedparser
+google-generativeai
+edge-tts
+moviepy==1.0.3
+decorator==4.4.2
+imageio-ffmpeg
