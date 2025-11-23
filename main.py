@@ -29,7 +29,7 @@ def get_latest_news():
 # 2. WRITE SCRIPT (Gemini)
 def generate_script_and_keywords(title, summary):
     print("🧠 Writing script with Gemini...")
-    model = genai.GenerativeModel('gemini-1.5-flash') # Free, fast model
+    model = genai.GenerativeModel('gemini-pro')
     
     prompt = f"""
     Act as a Gen-Z Tech Influencer. Write a 30-second YouTube Short script about: 
@@ -139,4 +139,5 @@ async def main():
         print("❌ Could not find video.")
 
 if __name__ == "__main__":
+
     asyncio.run(main())
