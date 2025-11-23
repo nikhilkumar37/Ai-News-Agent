@@ -26,10 +26,30 @@ def get_latest_news():
         return feed.entries[0].title, feed.entries[0].description[:500]
     return None, None
 
-# 2. WRITE SCRIPT (Gemini)
+# --- SMART MODEL SELECTOR ---
+def get_valid_model():
+    # This asks Google for a list of working models and picks the best one
+    print("🔍 Checking for available AI models...")
+    try:
+        for m in genai.list_models():
+            if 'generateContent' in m.supported_generation_methods:
+                if 'flash' in m.name.lower(): # Prefer the fast 'Flash' model
+                    return m.name
+        # If no Flash, take the first available Gemini model
+        for m in genai.list_models():
+            if 'generateContent' in m.supported_generation_methods and 'gemini' in m.name:
+                return m.name
+    except Exception as e:
+        print(f"⚠️ specific model check failed: {e}")
+    
+    # Absolute backup (usually works if listing fails)
+    return "gemini-1.5-flash-latest"
+
 def generate_script_and_keywords(title, summary):
-    print("🧠 Writing script with Gemini...")
-    model = genai.GenerativeModel('gemini-pro')
+    model_name = get_valid_model()
+    print(f"🧠 Writing script using model: {model_name}")
+    
+    model = genai.GenerativeModel(model_name)
     
     prompt = f"""
     Act as a Gen-Z Tech Influencer. Write a 30-second YouTube Short script about: 
@@ -53,7 +73,7 @@ def generate_script_and_keywords(title, summary):
     script = content[0].strip()
     search_term = content[1].strip() if len(content) > 1 else "Technology"
     return script, search_term
-
+    
 # 3. GENERATE VOICE (Edge TTS - Free)
 async def generate_audio(text, output_file="voiceover.mp3"):
     print("🗣️ Generating high-quality AI Voice...")
@@ -141,3 +161,4 @@ async def main():
 if __name__ == "__main__":
 
     asyncio.run(main())
+
